@@ -1,0 +1,45 @@
+:root {
+  --font-main: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --bg-page-start: #1e4b85;
+  --bg-page-end: #266dd3;
+  --bg-card: #ffffff;
+  --bg-header-start: #1a4f9c;
+  --bg-header-end: #2972eb;
+  --text-main: #333333;
+  --text-muted: #666666;
+  --text-light: #777777;
+  --text-white: #ffffff;
+  --color-admin-bg: #fff5f5;
+  --color-admin-border: #ffe3e3;
+  --color-admin-text: #e03131;
+  --color-manager-bg: #f8f0fc;
+  --color-manager-border: #f3d9fa;
+  --color-manager-text: #9c36b5;
+  --color-teacher-bg: #f0f7ff;
+  --color-teacher-border: #d0e2ff;
+  --color-teacher-text: #0f62fe;
+  --color-student-bg: #f4fce3;
+  --color-student-border: #e9fac8;
+  --color-student-text: #5c940d;
+  --btn-primary-bg: #266dd3;
+  --btn-primary-hover: #1e5bb5;
+  --btn-disabled-bg: #f1f3f5;
+  --btn-disabled-text: #adb5bd;
+  --btn-secondary-border: #dee2e6;
+  --btn-secondary-hover: #f8f9fa;
+  --radius-card: 16px;
+  --radius-item: 10px;
+  --radius-btn: 8px;
+  --shadow-main: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
