@@ -38,7 +38,7 @@
       </div>
 
       <button class="btn-logout" @click="handleLogout">
-        <span class="logout-icon">🚪</span> Вийти
+        <span class="logout-icon"></span> Вийти
       </button>
     </div>
   </aside>

@@ -1,10 +1,10 @@
 .sidebar {
   width: 280px;
-  background-color: #1e293b;
+  background-color: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
   height: 100vh;
-  color: #94a3b8;
+  color: var(--sidebar-text);
 }
 
 .sidebar-logo {
@@ -12,13 +12,13 @@
   align-items: center;
   padding: 24px;
   gap: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--sidebar-border);
 }
 
 .logo-icon {
   width: 32px;
   height: 32px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--sidebar-logo-icon-bg);
   border-radius: 8px;
   display: flex;
   justify-content: center;
@@ -28,7 +28,7 @@
 .logo-icon svg {
   width: 18px;
   height: 18px;
-  fill: #ffffff;
+  fill: var(--sidebar-text-hover);
 }
 
 .logo-text {
@@ -37,14 +37,14 @@
 }
 
 .logo-title {
-  color: #ffffff;
+  color: var(--sidebar-text-hover);
   font-weight: 600;
   font-size: 15px;
 }
 
 .logo-subtitle {
   font-size: 12px;
-  color: #38bdf8;
+  color: var(--sidebar-logo-accent);
 }
 
 .sidebar-nav {
@@ -61,7 +61,7 @@
   gap: 12px;
   padding: 12px 16px;
   text-decoration: none;
-  color: #cbd5e1;
+  color: var(--sidebar-text);
   font-weight: 500;
   font-size: 14px;
   border-radius: 8px;
@@ -69,18 +69,18 @@
 }
 
 .nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
+  background-color: var(--sidebar-item-hover);
+  color: var(--sidebar-text-hover);
 }
 
 .nav-item-active {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background-color: var(--sidebar-item-active);
+  color: var(--sidebar-text-hover);
 }
 
 .sidebar-footer {
   padding: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--sidebar-border);
 }
 
 .user-profile {
@@ -88,7 +88,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--sidebar-user-bg);
   border-radius: 8px;
   margin-bottom: 12px;
 }
@@ -96,8 +96,8 @@
 .user-avatar {
   width: 32px;
   height: 32px;
-  background-color: #475569;
-  color: #ffffff;
+  background-color: var(--sidebar-avatar-bg);
+  color: var(--sidebar-text-hover);
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -112,15 +112,15 @@
 }
 
 .user-name {
-  color: #ffffff;
+  color: var(--sidebar-text-hover);
   font-size: 13px;
   font-weight: 600;
 }
 
 .user-role {
-  color: #fca5a5;
+  color: var(--sidebar-role-text);
   font-size: 11px;
-  background-color: rgba(248, 113, 113, 0.2);
+  background-color: var(--sidebar-role-bg);
   padding: 2px 6px;
   border-radius: 4px;
   width: fit-content;
@@ -135,7 +135,7 @@
   padding: 10px 12px;
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--sidebar-text);
   cursor: pointer;
   font-size: 14px;
   border-radius: 8px;
@@ -144,6 +144,6 @@
 }
 
 .btn-logout:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
+  background-color: var(--sidebar-item-hover);
+  color: var(--sidebar-text-hover);
 }
