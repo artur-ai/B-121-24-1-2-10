@@ -56,15 +56,37 @@
         За вашим запитом нічого не знайдено
       </div>
     </div>
+
+    <DisciplineModal
+      :is-open="isModalOpen"
+      :discipline-to-edit="editingDiscipline"
+      @close="isModalOpen = false"
+      @save="saveDiscipline"
+    />
+
+    <div class="delete-confirm-overlay" v-if="deletingId !== null" @click.self="deletingId = null">
+      <div class="delete-confirm">
+        <p>Ви впевнені, що хочете видалити цю дисципліну?</p>
+        <div class="delete-confirm-actions">
+          <button class="btn btn-secondary" @click="deletingId = null">Скасувати</button>
+          <button class="btn btn-danger" @click="confirmDelete">Видалити</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import DisciplineModal from '../../components/DisciplineModal.vue';
 
 const searchQuery = ref('');
 const selectedTeacher = ref('');
 const sortBy = ref('name');
+
+const isModalOpen = ref(false);
+const editingDiscipline = ref<any>(null);
+const deletingId = ref<number | null>(null);
 
 const disciplines = ref([
   { id: 1, name: 'Алгоритми та структури даних', teacher: 'Шевченко М.П.', credits: 5, semester: 3, groups: ['КН-21', 'КН-31'] },
@@ -75,28 +97,48 @@ const disciplines = ref([
 
 const filteredDisciplines = computed(() => {
   let result = disciplines.value;
-
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase();
     result = result.filter(d => d.name.toLowerCase().includes(q));
   }
-
   if (selectedTeacher.value) {
     result = result.filter(d => d.teacher === selectedTeacher.value);
   }
-
   result = [...result].sort((a, b) => {
     if (sortBy.value === 'credits') return b.credits - a.credits;
     return a.name.localeCompare(b.name);
   });
-
   return result;
 });
 
-const handleAdd = () => alert('Відкрити форму додавання дисципліни');
-const handleEdit = (disc: any) => alert(`Редагувати: ${disc.name}`);
+const handleAdd = () => {
+  editingDiscipline.value = null;
+  isModalOpen.value = true;
+};
+
+const handleEdit = (disc: any) => {
+  editingDiscipline.value = disc;
+  isModalOpen.value = true;
+};
+
 const handleDelete = (id: number) => {
-  if(confirm('Видалити дисципліну?')) disciplines.value = disciplines.value.filter(d => d.id !== id);
+  deletingId.value = id;
+};
+
+const confirmDelete = () => {
+  disciplines.value = disciplines.value.filter(d => d.id !== deletingId.value);
+  deletingId.value = null;
+};
+
+const saveDiscipline = (data: any) => {
+  if (data.id) {
+    const index = disciplines.value.findIndex(d => d.id === data.id);
+    if (index !== -1) disciplines.value[index] = data;
+  } else {
+    const newId = disciplines.value.length > 0 ? Math.max(...disciplines.value.map(d => d.id)) + 1 : 1;
+    disciplines.value.push({ ...data, id: newId });
+  }
+  isModalOpen.value = false;
 };
 </script>
 

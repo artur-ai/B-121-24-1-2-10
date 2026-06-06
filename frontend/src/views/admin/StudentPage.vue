@@ -60,15 +60,37 @@
         За вашим запитом нічого не знайдено
       </div>
     </div>
+
+    <StudentModal
+      :is-open="isModalOpen"
+      :student-to-edit="editingStudent"
+      @close="isModalOpen = false"
+      @save="saveStudent"
+    />
+
+    <div class="delete-confirm-overlay" v-if="deletingId !== null" @click.self="deletingId = null">
+      <div class="delete-confirm">
+        <p>Ви впевнені, що хочете видалити цього студента?</p>
+        <div class="delete-confirm-actions">
+          <button class="btn btn-secondary" @click="deletingId = null">Скасувати</button>
+          <button class="btn btn-danger" @click="confirmDelete">Видалити</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import StudentModal from '../../components/StudentModal.vue';
 
 const searchQuery = ref('');
 const selectedGroup = ref('');
 const sortBy = ref('name');
+
+const isModalOpen = ref(false);
+const editingStudent = ref<any>(null);
+const deletingId = ref<number | null>(null);
 
 const students = ref([
   { id: 1, name: 'Бондаренко Олена Сергіївна', email: 'bondarenko@student.ua', group: 'КН-21', year: 2023 },
@@ -83,28 +105,48 @@ const students = ref([
 
 const filteredStudents = computed(() => {
   let result = students.value;
-
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase();
     result = result.filter(s => s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q));
   }
-
   if (selectedGroup.value) {
     result = result.filter(s => s.group === selectedGroup.value);
   }
-
   result = [...result].sort((a, b) => {
     if (sortBy.value === 'year') return b.year - a.year;
     return a.name.localeCompare(b.name);
   });
-
   return result;
 });
 
-const handleAdd = () => alert('Відкрити форму додавання студента');
-const handleEdit = (student: any) => alert(`Редагувати: ${student.name}`);
+const handleAdd = () => {
+  editingStudent.value = null;
+  isModalOpen.value = true;
+};
+
+const handleEdit = (student: any) => {
+  editingStudent.value = student;
+  isModalOpen.value = true;
+};
+
 const handleDelete = (id: number) => {
-  if(confirm('Видалити студента?')) students.value = students.value.filter(s => s.id !== id);
+  deletingId.value = id;
+};
+
+const confirmDelete = () => {
+  students.value = students.value.filter(s => s.id !== deletingId.value);
+  deletingId.value = null;
+};
+
+const saveStudent = (data: any) => {
+  if (data.id) {
+    const index = students.value.findIndex(s => s.id === data.id);
+    if (index !== -1) students.value[index] = data;
+  } else {
+    const newId = students.value.length > 0 ? Math.max(...students.value.map(s => s.id)) + 1 : 1;
+    students.value.push({ ...data, id: newId });
+  }
+  isModalOpen.value = false;
 };
 </script>
 
