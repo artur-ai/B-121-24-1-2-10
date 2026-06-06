@@ -1,0 +1,207 @@
+.disciplines-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.search-box {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  width: 20px;
+  height: 20px;
+  fill: var(--text-light);
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-family: var(--font-main);
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--bg-page-end);
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.filter-select {
+  padding: 12px 36px 12px 16px;
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-btn);
+  background-color: var(--bg-card);
+  font-size: 14px;
+  font-family: var(--font-main);
+  color: var(--text-dark);
+  cursor: pointer;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2364748b"><path d="M7 10L12 15L17 10H7Z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
+  outline: none;
+}
+
+.add-btn {
+  padding: 12px 24px;
+  background-color: var(--btn-primary-bg);
+  color: var(--text-white);
+  border: none;
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.add-btn:hover {
+  background-color: var(--btn-primary-hover);
+}
+
+.results-count {
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 16px;
+}
+
+.disciplines-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.discipline-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-item);
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: box-shadow 0.2s ease;
+}
+
+.discipline-card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.discipline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.discipline-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.discipline-meta {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.discipline-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.group-tag {
+  background-color: var(--tag-bg);
+  color: var(--tag-text);
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.discipline-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.credit-badge {
+  background-color: var(--avatar-bg-blue);
+  color: var(--avatar-text-blue);
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.discipline-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.action-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--text-light);
+  transition: fill 0.2s ease;
+}
+
+.action-btn:hover {
+  background-color: var(--bg-light-gray);
+}
+
+.action-btn:hover svg {
+  fill: var(--text-main);
+}
+
+.delete-btn:hover {
+  background-color: var(--color-admin-bg);
+}
+
+.delete-btn:hover svg {
+  fill: var(--color-admin-text);
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-light);
+  padding: 40px;
+  background-color: var(--bg-card);
+  border-radius: var(--radius-item);
+  border: 1px dashed var(--btn-secondary-border);
+}
