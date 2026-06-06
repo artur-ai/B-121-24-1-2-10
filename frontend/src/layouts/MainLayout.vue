@@ -28,6 +28,8 @@ const currentPageTitle = computed(() => {
     case '/admin/groups': return 'Групи';
     case '/admin/students': return 'Студенти';
     case '/admin/disciplines': return 'Дисципліни';
+    case '/teacher': return 'Оцінки студентів';
+    case '/student': return 'Мої оцінки';
     default: return 'Система управління';
   }
 });

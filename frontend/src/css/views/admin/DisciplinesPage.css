@@ -98,11 +98,25 @@
   background-color: var(--bg-card);
   border: 1px solid var(--btn-secondary-border);
   border-radius: var(--radius-item);
-  padding: 24px;
+  padding: 20px 24px;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  gap: 16px;
   transition: box-shadow 0.2s ease;
+}
+
+.discipline-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #e0f2fe;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .discipline-card:hover {
@@ -110,9 +124,11 @@
 }
 
 .discipline-content {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .discipline-name {
@@ -204,4 +220,72 @@
   background-color: var(--bg-card);
   border-radius: var(--radius-item);
   border: 1px dashed var(--btn-secondary-border);
+}
+
+.state-message {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px;
+}
+
+.state-message.error {
+  color: #e03131;
+}
+
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.delete-confirm {
+  background-color: var(--bg-card);
+  border-radius: var(--radius-card);
+  padding: 32px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: modal-pop 0.3s ease-out;
+}
+
+@keyframes modal-pop {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.delete-confirm p {
+  margin: 0 0 24px;
+  font-size: 15px;
+  color: var(--text-main);
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-danger {
+  background-color: #e03131;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-family: var(--font-main);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: #c92a2a;
 }

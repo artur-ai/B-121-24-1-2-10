@@ -7,6 +7,8 @@
       </div>
 
       <div class="modal-body">
+        <div v-if="validationError" class="form-error">{{ validationError }}</div>
+
         <div class="form-row">
           <div class="form-group">
             <label>Назва групи</label>
@@ -14,28 +16,13 @@
           </div>
           <div class="form-group">
             <label>Курс</label>
-            <select v-model="form.course">
+            <select v-model="form.year">
               <option :value="1">1 курс</option>
               <option :value="2">2 курс</option>
               <option :value="3">3 курс</option>
               <option :value="4">4 курс</option>
             </select>
           </div>
-        </div>
-
-        <div class="form-group">
-          <label>Спеціальність</label>
-          <input type="text" v-model="form.specialty" placeholder="Комп'ютерні науки" />
-        </div>
-
-        <div class="form-group">
-          <label>Куратор</label>
-          <input type="text" v-model="form.curator" placeholder="Іванов Іван Іванович" />
-        </div>
-
-        <div class="form-group">
-          <label>Кількість студентів</label>
-          <input type="number" v-model.number="form.studentsCount" placeholder="25" min="0" />
         </div>
       </div>
 
@@ -48,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch } from 'vue'
 
 const props = defineProps({
   isOpen: Boolean,
@@ -56,41 +43,48 @@ const props = defineProps({
     type: Object as () => any | null,
     default: null
   }
-});
+})
 
-const emit = defineEmits(['close', 'save']);
+const emit = defineEmits(['close', 'save'])
 
-const isEditing = ref(false);
+const isEditing = ref(false)
+const validationError = ref('')
 
 const form = ref({
   id: null as number | null,
   name: '',
-  specialty: '',
-  course: 1,
-  curator: '',
-  studentsCount: 0
-});
+  year: 1
+})
 
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
+    validationError.value = ''
     if (props.groupToEdit) {
-      isEditing.value = true;
-      form.value = { ...props.groupToEdit };
+      isEditing.value = true
+      form.value = {
+        id: props.groupToEdit.id,
+        name: props.groupToEdit.name || '',
+        year: props.groupToEdit.year ?? props.groupToEdit.course ?? 1
+      }
     } else {
-      isEditing.value = false;
-      form.value = { id: null, name: '', specialty: '', course: 1, curator: '', studentsCount: 0 };
+      isEditing.value = false
+      form.value = { id: null, name: '', year: 1 }
     }
   }
-});
+})
 
 const closeModal = () => {
-  emit('close');
-};
+  emit('close')
+}
 
 const saveGroup = () => {
-  if (!form.value.name.trim()) return;
-  emit('save', { ...form.value });
-};
+  if (!form.value.name.trim()) {
+    validationError.value = 'Введіть назву групи'
+    return
+  }
+  validationError.value = ''
+  emit('save', { ...form.value })
+}
 </script>
 
 <style src="../css/components/TeacherModal.css"></style>

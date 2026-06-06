@@ -9,44 +9,39 @@
       <div class="filters">
         <select class="filter-select" v-model="selectedGroup">
           <option value="">Усі групи</option>
-          <option value="КН-21">КН-21</option>
-          <option value="КН-31">КН-31</option>
-          <option value="ПЗ-11">ПЗ-11</option>
-          <option value="ПЗ-21">ПЗ-21</option>
+          <option v-for="g in availableGroups" :key="g.id" :value="g.name">{{ g.name }}</option>
         </select>
 
         <select class="filter-select" v-model="sortBy">
-          <option value="name">Прізвище</option>
-          <option value="year">Рік вступу</option>
+          <option value="name_asc">Сортувати: А-Я</option>
+          <option value="name_desc">Сортувати: Я-А</option>
         </select>
 
-        <button class="btn btn-primary add-btn" @click="handleAdd">+ Додати</button>
+        <button v-if="canEdit" class="btn btn-primary add-btn" @click="handleAdd">+ Додати</button>
       </div>
     </div>
 
     <div class="results-count">Знайдено: {{ filteredStudents.length }}</div>
 
-    <div class="students-table-card">
-      <div class="table-header">
-        <div class="col-name">Студент</div>
-        <div class="col-group">Група</div>
-        <div class="col-year">Рік вступу</div>
-        <div class="col-actions"></div>
-      </div>
+    <div v-if="loading" class="state-message">Завантаження...</div>
+    <div v-else-if="error" class="state-message error">{{ error }}</div>
+    <div v-else class="students-list">
+      <div class="student-card" v-for="student in filteredStudents" :key="student.id">
+        <div class="student-avatar">{{ student.initials }}</div>
 
-      <div class="table-row" v-for="student in filteredStudents" :key="student.id">
-        <div class="col-name">
+        <div class="student-details">
           <div class="student-name">{{ student.name }}</div>
-          <div class="student-email">{{ student.email }}</div>
+          <div class="student-subtitle">{{ student.groupName || 'Без групи' }}</div>
+
+          <div class="student-contacts">
+            <span class="contact-item">
+              <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z"/></svg>
+              {{ student.email }}
+            </span>
+          </div>
         </div>
 
-        <div class="col-group">
-          <span class="group-badge">{{ student.group }}</span>
-        </div>
-
-        <div class="col-year">{{ student.year }}</div>
-
-        <div class="col-actions">
+        <div v-if="canEdit" class="student-actions">
           <button class="action-btn" @click="handleEdit(student)">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z"/></svg>
           </button>
@@ -56,14 +51,15 @@
         </div>
       </div>
 
-      <div v-if="filteredStudents.length === 0" class="empty-state">
-        За вашим запитом нічого не знайдено
+      <div v-if="filteredStudents.length === 0" style="text-align: center; color: var(--text-muted); padding: 40px;">
+        За вашим запитом нікого не знайдено
       </div>
     </div>
 
     <StudentModal
       :is-open="isModalOpen"
       :student-to-edit="editingStudent"
+      :groups="availableGroups"
       @close="isModalOpen = false"
       @save="saveStudent"
     />
@@ -81,73 +77,138 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import StudentModal from '../../components/StudentModal.vue';
+import { ref, computed, onMounted } from 'vue'
+import StudentModal from '../../components/StudentModal.vue'
+import { studentsApi, type StudentResponse } from '../../api/studentsApi'
+import { groupsApi, type GroupResponse } from '../../api/groupsApi'
+import { useAuthStore } from '../../stores/authStore'
 
-const searchQuery = ref('');
-const selectedGroup = ref('');
-const sortBy = ref('name');
+const authStore = useAuthStore()
+const canEdit = computed(() => authStore.isRole('ADMIN', 'MANAGER'))
 
-const isModalOpen = ref(false);
-const editingStudent = ref<any>(null);
-const deletingId = ref<number | null>(null);
+const searchQuery = ref('')
+const selectedGroup = ref('')
+const sortBy = ref('name_asc')
 
-const students = ref([
-  { id: 1, name: 'Бондаренко Олена Сергіївна', email: 'bondarenko@student.ua', group: 'КН-21', year: 2023 },
-  { id: 2, name: 'Гриценко Наталія Василівна', email: 'grytsenko@student.ua', group: 'КН-31', year: 2022 },
-  { id: 3, name: 'Іваненко Марія Олегівна', email: 'ivanenko@student.ua', group: 'ПЗ-11', year: 2024 },
-  { id: 4, name: 'Кравченко Дмитро Андрійович', email: 'kravchenko@student.ua', group: 'КН-21', year: 2023 },
-  { id: 5, name: 'Лисенко Вікторія Ярославівна', email: 'lysenko@student.ua', group: 'ПЗ-21', year: 2023 },
-  { id: 6, name: 'Мельник Тарас Олексійович', email: 'melnyk@student.ua', group: 'КН-21', year: 2023 },
-  { id: 7, name: 'Рибаченко Артем Сергійович', email: 'rybachenko@student.ua', group: 'ПЗ-11', year: 2024 },
-  { id: 8, name: 'Ткаченко Олексій Романович', email: 'tkachenko@student.ua', group: 'КН-31', year: 2022 },
-]);
+const isModalOpen = ref(false)
+const editingStudent = ref<any>(null)
+const deletingId = ref<number | null>(null)
+const loading = ref(false)
+const error = ref('')
+
+const availableGroups = ref<GroupResponse[]>([])
+
+interface StudentUI {
+  id: number
+  initials: string
+  name: string
+  email: string
+  groupId: number | null
+  groupName: string
+  firstName: string
+  lastName: string
+}
+
+const students = ref<StudentUI[]>([])
+
+function mapStudent(s: StudentResponse): StudentUI {
+  const name = `${s.lastName} ${s.firstName}`.trim()
+  const initials = `${s.lastName?.[0] ?? ''}${s.firstName?.[0] ?? ''}`.toUpperCase()
+  return {
+    id: s.id,
+    initials,
+    name,
+    email: s.email,
+    groupId: s.groupId ?? null,
+    groupName: s.groupName ?? '',
+    firstName: s.firstName,
+    lastName: s.lastName
+  }
+}
+
+async function fetchAll() {
+  loading.value = true
+  error.value = ''
+  try {
+    const [studentsData, groupsData] = await Promise.all([
+      studentsApi.getAll(),
+      groupsApi.getAll()
+    ])
+    students.value = studentsData.map(mapStudent)
+    availableGroups.value = groupsData
+  } catch {
+    error.value = 'Не вдалося завантажити дані. Перевірте підключення до сервера.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchAll)
 
 const filteredStudents = computed(() => {
-  let result = students.value;
+  let result = students.value
   if (searchQuery.value) {
-    const q = searchQuery.value.toLowerCase();
-    result = result.filter(s => s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q));
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(s => s.name.toLowerCase().includes(q) || s.email.toLowerCase().includes(q))
   }
   if (selectedGroup.value) {
-    result = result.filter(s => s.group === selectedGroup.value);
+    result = result.filter(s => s.groupName === selectedGroup.value)
   }
-  result = [...result].sort((a, b) => {
-    if (sortBy.value === 'year') return b.year - a.year;
-    return a.name.localeCompare(b.name);
-  });
-  return result;
-});
+  return [...result].sort((a, b) =>
+    sortBy.value === 'name_asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)
+  )
+})
 
 const handleAdd = () => {
-  editingStudent.value = null;
-  isModalOpen.value = true;
-};
+  editingStudent.value = null
+  isModalOpen.value = true
+}
 
-const handleEdit = (student: any) => {
-  editingStudent.value = student;
-  isModalOpen.value = true;
-};
+const handleEdit = (student: StudentUI) => {
+  editingStudent.value = student
+  isModalOpen.value = true
+}
 
 const handleDelete = (id: number) => {
-  deletingId.value = id;
-};
+  deletingId.value = id
+}
 
-const confirmDelete = () => {
-  students.value = students.value.filter(s => s.id !== deletingId.value);
-  deletingId.value = null;
-};
-
-const saveStudent = (data: any) => {
-  if (data.id) {
-    const index = students.value.findIndex(s => s.id === data.id);
-    if (index !== -1) students.value[index] = data;
-  } else {
-    const newId = students.value.length > 0 ? Math.max(...students.value.map(s => s.id)) + 1 : 1;
-    students.value.push({ ...data, id: newId });
+const confirmDelete = async () => {
+  if (deletingId.value === null) return
+  try {
+    await studentsApi.delete(deletingId.value)
+    await fetchAll()
+  } catch {
+    error.value = 'Не вдалося видалити студента.'
+  } finally {
+    deletingId.value = null
   }
-  isModalOpen.value = false;
-};
+}
+
+const saveStudent = async (formData: any) => {
+  try {
+    if (formData.id) {
+      await studentsApi.update(formData.id, {
+        firstName: formData.firstName || '',
+        lastName: formData.lastName || '',
+        email: formData.email || '',
+        groupId: formData.groupId ?? null
+      })
+    } else {
+      await studentsApi.create({
+        firstName: formData.firstName || '',
+        lastName: formData.lastName || '',
+        email: formData.email || '',
+        groupId: formData.groupId ?? null,
+        userId: formData.userId || null
+      })
+    }
+    isModalOpen.value = false
+    await fetchAll()
+  } catch {
+    error.value = 'Не вдалося зберегти студента.'
+  }
+}
 </script>
 
 <style src="../../css/views/admin/StudentsPage.css"></style>

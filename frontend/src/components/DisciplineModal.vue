@@ -7,34 +7,31 @@
       </div>
 
       <div class="modal-body">
+        <div v-if="validationError" class="form-error">{{ validationError }}</div>
+
         <div class="form-group">
           <label>Назва дисципліни</label>
           <input type="text" v-model="form.name" placeholder="Введіть назву" />
         </div>
 
         <div class="form-group">
-          <label>Викладач</label>
-          <select v-model="form.teacher">
-            <option value="Шевченко М.П.">Шевченко М.П.</option>
-            <option value="Коваленко А.І.">Коваленко А.І.</option>
-            <option value="Петренко Л.В.">Петренко Л.В.</option>
-          </select>
+          <label>Опис</label>
+          <input type="text" v-model="form.description" placeholder="Короткий опис дисципліни" />
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Кредити</label>
-            <input type="number" v-model.number="form.credits" min="1" max="10" />
+        <div class="form-group" v-if="teachers && teachers.length">
+          <label>Викладачі</label>
+          <div class="teachers-check-list">
+            <label class="teacher-check-item" v-for="t in teachers" :key="t.id">
+              <input
+                type="checkbox"
+                :checked="form.teacherIds.includes(t.id)"
+                @change="toggleTeacher(t.id)"
+              />
+              <span>{{ t.lastName }} {{ t.firstName }}</span>
+              <span class="teacher-check-pos" v-if="t.position">{{ t.position }}</span>
+            </label>
           </div>
-          <div class="form-group">
-            <label>Семестр</label>
-            <input type="number" v-model.number="form.semester" min="1" max="8" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Групи (через кому)</label>
-          <input type="text" v-model="groupsInput" placeholder="КН-21, ПЗ-11" />
         </div>
       </div>
 
@@ -47,50 +44,70 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { reactive, ref, watch } from 'vue'
+import type { TeacherResponse } from '../api/teachersApi'
 
-const props = defineProps({
-  isOpen: Boolean,
-  disciplineToEdit: {
-    type: Object as () => any | null,
-    default: null
-  }
-});
+const props = defineProps<{
+  isOpen: boolean
+  disciplineToEdit?: any | null
+  teachers?: TeacherResponse[]
+}>()
 
-const emit = defineEmits(['close', 'save']);
+const emit = defineEmits(['close', 'save'])
 
-const form = ref({
+const form = reactive({
   id: null as number | null,
   name: '',
-  teacher: 'Шевченко М.П.',
-  credits: 4,
-  semester: 1
-});
+  description: '',
+  teacherIds: [] as number[]
+})
 
-const groupsInput = ref('');
-const isEditing = ref(false);
+const validationError = ref('')
+const isEditing = ref(false)
 
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
+    validationError.value = ''
     if (props.disciplineToEdit) {
-      isEditing.value = true;
-      form.value = { ...props.disciplineToEdit };
-      groupsInput.value = props.disciplineToEdit.groups.join(', ');
+      isEditing.value = true
+      form.id = props.disciplineToEdit.id
+      form.name = props.disciplineToEdit.name || ''
+      form.description = props.disciplineToEdit.description || ''
+      form.teacherIds = [...(props.disciplineToEdit.teacherIds ?? [])]
     } else {
-      isEditing.value = false;
-      form.value = { id: null, name: '', teacher: 'Шевченко М.П.', credits: 4, semester: 1 };
-      groupsInput.value = '';
+      isEditing.value = false
+      form.id = null
+      form.name = ''
+      form.description = ''
+      form.teacherIds = []
     }
   }
-});
+})
 
-const closeModal = () => emit('close');
+function toggleTeacher(id: number) {
+  const idx = form.teacherIds.indexOf(id)
+  if (idx === -1) {
+    form.teacherIds.push(id)
+  } else {
+    form.teacherIds.splice(idx, 1)
+  }
+}
+
+const closeModal = () => emit('close')
 
 const saveDiscipline = () => {
-  if (!form.value.name) return alert('Введіть назву');
-  const groups = groupsInput.value.split(',').map(g => g.trim()).filter(g => g);
-  emit('save', { ...form.value, groups });
-};
+  if (!form.name.trim()) {
+    validationError.value = 'Введіть назву дисципліни'
+    return
+  }
+  validationError.value = ''
+  emit('save', {
+    id: form.id,
+    name: form.name,
+    description: form.description,
+    teacherIds: [...form.teacherIds]
+  })
+}
 </script>
 
 <style src="../css/components/DisciplineModal.css"></style>

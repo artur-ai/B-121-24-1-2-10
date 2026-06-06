@@ -88,10 +88,10 @@
   background-color: var(--bg-card);
   border: 1px solid var(--btn-secondary-border);
   border-radius: var(--radius-item);
-  padding: 24px;
+  padding: 20px 24px;
   display: flex;
-  align-items: flex-start;
-  gap: 24px;
+  align-items: center;
+  gap: 20px;
   transition: box-shadow 0.2s ease;
 }
 
@@ -100,21 +100,17 @@
 }
 
 .group-badge {
-  width: 56px;
-  height: 56px;
-  background-color: var(--color-teacher-bg);
-  color: var(--color-teacher-text);
-  border: 1px solid var(--color-teacher-border);
-  border-radius: var(--radius-btn);
+  width: 48px;
+  height: 48px;
+  background-color: var(--avatar-bg-blue);
+  color: var(--avatar-text-blue);
+  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 18px;
   flex-shrink: 0;
-  text-align: center;
-  line-height: 1.2;
-  padding: 4px;
 }
 
 .group-details {

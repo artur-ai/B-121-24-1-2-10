@@ -18,32 +18,27 @@
         <select class="filter-select" v-model="sortBy">
           <option value="name">Сортувати: назва</option>
           <option value="course">Сортувати: курс</option>
-          <option value="students">Сортувати: студенти</option>
         </select>
 
-        <button class="btn btn-primary add-btn" @click="handleAdd">+ Додати</button>
+        <button v-if="canEdit" class="btn btn-primary add-btn" @click="handleAdd">+ Додати</button>
       </div>
     </div>
 
     <div class="results-count">Знайдено: {{ filteredGroups.length }}</div>
 
-    <div class="groups-list">
+    <div v-if="loading" class="empty-state">Завантаження...</div>
+    <div v-else-if="error" class="empty-state" style="color: #e03131;">{{ error }}</div>
+    <div v-else class="groups-list">
       <div class="group-card" v-for="group in filteredGroups" :key="group.id">
-        <div class="group-badge">{{ group.name }}</div>
+        <div class="group-badge">{{ group.name?.[0]?.toUpperCase() }}</div>
 
         <div class="group-details">
           <div class="group-header">
             <span class="group-name">{{ group.name }}</span>
-            <span class="group-course-tag">{{ group.course }} курс</span>
+            <span class="group-course-tag">{{ group.year }} курс</span>
           </div>
 
-          <div class="group-specialty">{{ group.specialty }}</div>
-
           <div class="group-meta">
-            <span class="meta-item">
-              <svg class="meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/></svg>
-              {{ group.curator }}
-            </span>
             <span class="meta-item">
               <svg class="meta-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 11C17.66 11 18.99 9.66 18.99 8C18.99 6.34 17.66 5 16 5C14.34 5 13 6.34 13 8C13 9.66 14.34 11 16 11ZM8 11C9.66 11 10.99 9.66 10.99 8C10.99 6.34 9.66 5 8 5C6.34 5 5 6.34 5 8C5 9.66 6.34 11 8 11ZM8 13C5.67 13 1 14.17 1 16.5V18H15V16.5C15 14.17 10.33 13 8 13ZM16 13C15.71 13 15.38 13.02 15.03 13.05C16.19 13.89 17 15.02 17 16.5V18H23V16.5C23 14.17 18.33 13 16 13Z"/></svg>
               {{ group.studentsCount }} студентів
@@ -51,7 +46,7 @@
           </div>
         </div>
 
-        <div class="group-actions">
+        <div v-if="canEdit" class="group-actions">
           <button class="action-btn" @click="handleEdit(group)">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z"/></svg>
           </button>
@@ -86,87 +81,112 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import GroupModal from '../../components/GroupModal.vue';
+import { ref, computed, onMounted } from 'vue'
+import GroupModal from '../../components/GroupModal.vue'
+import { groupsApi, type GroupResponse } from '../../api/groupsApi'
+import { useAuthStore } from '../../stores/authStore'
 
-const searchQuery = ref('');
-const selectedCourse = ref('');
-const sortBy = ref('name');
+const authStore = useAuthStore()
+const canEdit = computed(() => authStore.isRole('ADMIN', 'MANAGER'))
 
-const isModalOpen = ref(false);
-const editingGroup = ref<any>(null);
-const deletingId = ref<number | null>(null);
+const searchQuery = ref('')
+const selectedCourse = ref('')
+const sortBy = ref('name')
 
-interface Group {
-  id: number;
-  name: string;
-  specialty: string;
-  course: number;
-  curator: string;
-  studentsCount: number;
+const isModalOpen = ref(false)
+const editingGroup = ref<any>(null)
+const deletingId = ref<number | null>(null)
+const loading = ref(false)
+const error = ref('')
+
+interface GroupUI {
+  id: number
+  name: string
+  year: number
+  studentsCount: number
 }
 
-const groups = ref<Group[]>([
-  { id: 1, name: 'КН-21', specialty: "Комп'ютерні науки", course: 2, curator: 'Коваленко Андрій Іванович', studentsCount: 28 },
-  { id: 2, name: 'КН-31', specialty: "Комп'ютерні науки", course: 3, curator: 'Петренко Людмила Василівна', studentsCount: 25 },
-  { id: 3, name: 'ПЗ-11', specialty: 'Програмна інженерія', course: 1, curator: 'Савченко Ігор Олегович', studentsCount: 30 },
-  { id: 4, name: 'ПЗ-21', specialty: 'Програмна інженерія', course: 2, curator: 'Шевченко Микола Петрович', studentsCount: 27 },
-]);
+const groups = ref<GroupUI[]>([])
+
+function mapGroup(g: GroupResponse): GroupUI {
+  return { id: g.id, name: g.name, year: g.year, studentsCount: g.studentCount ?? 0 }
+}
+
+async function fetchGroups() {
+  loading.value = true
+  error.value = ''
+  try {
+    const data = await groupsApi.getAll()
+    groups.value = data.map(mapGroup)
+  } catch {
+    error.value = 'Не вдалося завантажити групи. Перевірте підключення до сервера.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchGroups)
 
 const filteredGroups = computed(() => {
-  let result = groups.value;
+  let result = groups.value
 
   if (searchQuery.value) {
-    const q = searchQuery.value.toLowerCase();
-    result = result.filter(g =>
-      g.name.toLowerCase().includes(q) ||
-      g.specialty.toLowerCase().includes(q) ||
-      g.curator.toLowerCase().includes(q)
-    );
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(g => g.name.toLowerCase().includes(q))
   }
 
   if (selectedCourse.value) {
-    result = result.filter(g => g.course === Number(selectedCourse.value));
+    result = result.filter(g => g.year === Number(selectedCourse.value))
   }
 
   result = [...result].sort((a, b) => {
-    if (sortBy.value === 'course') return a.course - b.course;
-    if (sortBy.value === 'students') return b.studentsCount - a.studentsCount;
-    return a.name.localeCompare(b.name);
-  });
+    if (sortBy.value === 'course') return a.year - b.year
+    return a.name.localeCompare(b.name)
+  })
 
-  return result;
-});
+  return result
+})
 
 const handleAdd = () => {
-  editingGroup.value = null;
-  isModalOpen.value = true;
-};
+  editingGroup.value = null
+  isModalOpen.value = true
+}
 
-const handleEdit = (group: Group) => {
-  editingGroup.value = group;
-  isModalOpen.value = true;
-};
+const handleEdit = (group: GroupUI) => {
+  editingGroup.value = group
+  isModalOpen.value = true
+}
 
 const handleDelete = (id: number) => {
-  deletingId.value = id;
-};
+  deletingId.value = id
+}
 
-const confirmDelete = () => {
-  groups.value = groups.value.filter(g => g.id !== deletingId.value);
-  deletingId.value = null;
-};
-
-const saveGroup = (data: any) => {
-  if (data.id) {
-    const index = groups.value.findIndex(g => g.id === data.id);
-    if (index !== -1) groups.value[index] = data;
-  } else {
-    const newId = groups.value.length > 0 ? Math.max(...groups.value.map(g => g.id)) + 1 : 1;
-    groups.value.push({ ...data, id: newId });
+const confirmDelete = async () => {
+  if (deletingId.value === null) return
+  try {
+    await groupsApi.delete(deletingId.value)
+    await fetchGroups()
+  } catch {
+    error.value = 'Не вдалося видалити групу.'
+  } finally {
+    deletingId.value = null
   }
-  isModalOpen.value = false;
-};
+}
+
+const saveGroup = async (data: any) => {
+  const request = { name: data.name, year: data.year ?? data.course ?? 1 }
+  try {
+    if (data.id) {
+      await groupsApi.update(data.id, request)
+    } else {
+      await groupsApi.create(request)
+    }
+    isModalOpen.value = false
+    await fetchGroups()
+  } catch {
+    error.value = 'Не вдалося зберегти групу.'
+  }
+}
 </script>
 
 <style src="../../css/views/admin/GroupsPage.css"></style>

@@ -14,46 +14,23 @@
 
       <div class="hero-stats">
         <div class="stat-box">
-          <div class="stat-number">4</div>
+          <div class="stat-number">{{ teachers.length || '—' }}</div>
           <div class="stat-label">Викладачів</div>
         </div>
         <div class="stat-box">
-          <div class="stat-number">4</div>
+          <div class="stat-number">{{ disciplines.length || '—' }}</div>
           <div class="stat-label">Дисциплін</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number">2</div>
-          <div class="stat-label">Спеціальностей</div>
         </div>
       </div>
     </section>
 
     <div class="tabs-container">
-      <button
-        class="tab-btn"
-        :class="{ active: activeTab === 'about' }"
-        @click="activeTab = 'about'"
-      >
-        Про кафедру
-      </button>
-      <button
-        class="tab-btn"
-        :class="{ active: activeTab === 'teachers' }"
-        @click="activeTab = 'teachers'"
-      >
-        Викладачі
-      </button>
-      <button
-        class="tab-btn"
-        :class="{ active: activeTab === 'disciplines' }"
-        @click="activeTab = 'disciplines'"
-      >
-        Дисципліни
-      </button>
+      <button class="tab-btn" :class="{ active: activeTab === 'about' }" @click="activeTab = 'about'">Про кафедру</button>
+      <button class="tab-btn" :class="{ active: activeTab === 'teachers' }" @click="activeTab = 'teachers'">Викладачі</button>
+      <button class="tab-btn" :class="{ active: activeTab === 'disciplines' }" @click="activeTab = 'disciplines'">Дисципліни</button>
     </div>
 
     <div class="info-section" v-if="activeTab === 'about'">
-
       <div class="content-card full-width">
         <h3 class="card-heading">Про кафедру</h3>
         <p class="card-text">
@@ -77,16 +54,88 @@
           </ul>
         </div>
       </div>
+    </div>
 
+    <div class="info-section" v-if="activeTab === 'teachers'">
+      <div v-if="loading" class="state-message">Завантаження...</div>
+      <div v-else-if="error" class="state-message error">{{ error }}</div>
+      <div v-else-if="teachers.length === 0" class="content-card">
+        <p class="card-text">Викладачів ще не додано.</p>
+      </div>
+      <div v-else class="teachers-grid">
+        <div class="teacher-card" v-for="t in teachers" :key="t.id">
+          <div class="teacher-avatar">{{ initials(t) }}</div>
+          <div class="teacher-info">
+            <div class="teacher-name">{{ t.lastName }} {{ t.firstName }}</div>
+            <div class="teacher-position">{{ [t.position, t.degree].filter(Boolean).join(' · ') }}</div>
+          </div>
+          <div class="teacher-email">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V8L12 13L20 8V18ZM12 11L4 6H20L12 11Z"/></svg>
+            {{ t.email }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section" v-if="activeTab === 'disciplines'">
+      <div v-if="loading" class="state-message">Завантаження...</div>
+      <div v-else-if="error" class="state-message error">{{ error }}</div>
+      <div v-else-if="disciplines.length === 0" class="content-card">
+        <p class="card-text">Дисциплін ще не додано.</p>
+      </div>
+      <div v-else class="disciplines-list-dash">
+        <div class="discipline-item" v-for="d in disciplines" :key="d.id">
+          <div class="discipline-avatar">{{ d.name?.[0]?.toUpperCase() }}</div>
+          <div class="discipline-info">
+            <div class="discipline-name">{{ d.name }}</div>
+            <div class="discipline-desc" v-if="teacherName(d.teacherIds)">
+              Викладач: {{ teacherName(d.teacherIds) }}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue'
+import { teachersApi, type TeacherResponse } from '../../api/teachersApi'
+import { disciplinesApi, type DisciplineResponse } from '../../api/disciplinesApi'
 
-const activeTab = ref('about');
+const activeTab = ref('about')
+const loading = ref(false)
+const error = ref('')
+
+const teachers = ref<TeacherResponse[]>([])
+const disciplines = ref<DisciplineResponse[]>([])
+
+const initials = (t: TeacherResponse) =>
+  `${t.lastName?.[0] ?? ''}${t.firstName?.[0] ?? ''}`.toUpperCase()
+
+const teacherName = (ids: number[]) => {
+  if (!ids?.length) return ''
+  return ids
+    .map(id => teachers.value.find(t => t.id === id))
+    .filter(Boolean)
+    .map(t => `${t!.lastName} ${t!.firstName}`)
+    .join(', ')
+}
+
+onMounted(async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const [t, d] = await Promise.all([teachersApi.getAll(), disciplinesApi.getAll()])
+    teachers.value = t
+    disciplines.value = d
+  } catch {
+    error.value = 'Не вдалося завантажити дані'
+  } finally {
+    loading.value = false
+  }
+})
 </script>
 
 <style src="@/css/views/Dashboard.css"></style>

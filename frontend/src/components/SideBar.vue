@@ -11,47 +11,115 @@
     </div>
 
     <nav class="sidebar-nav">
-      <router-link to="/admin" class="nav-item" active-class="nav-item-active">
-        <span class="nav-icon">🏠</span> Про кафедру
-      </router-link>
-      <router-link to="/admin/teachers" class="nav-item" active-class="nav-item-active">
-        <span class="nav-icon">👨‍🏫</span> Викладачі
-      </router-link>
-      <router-link to="/admin/groups" class="nav-item" active-class="nav-item-active">
-        <span class="nav-icon">👥</span> Групи
-      </router-link>
-      <router-link to="/admin/students" class="nav-item" active-class="nav-item-active">
-        <span class="nav-icon">🎓</span> Студенти
-      </router-link>
-      <router-link to="/admin/disciplines" class="nav-item" active-class="nav-item-active">
-        <span class="nav-icon">📚</span> Дисципліни
-      </router-link>
+      <template v-if="isAdminOrManager">
+        <router-link to="/admin" class="nav-item" active-class="nav-item-active" exact>
+          <span class="nav-icon">🏠</span> Про кафедру
+        </router-link>
+        <router-link to="/admin/teachers" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">👨‍🏫</span> Викладачі
+        </router-link>
+        <router-link to="/admin/groups" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">👥</span> Групи
+        </router-link>
+        <router-link to="/admin/students" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">🎓</span> Студенти
+        </router-link>
+        <router-link to="/admin/disciplines" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">📚</span> Дисципліни
+        </router-link>
+      </template>
+
+      <template v-else-if="isTeacher">
+        <router-link to="/admin" class="nav-item" active-class="nav-item-active" exact>
+          <span class="nav-icon">🏠</span> Про кафедру
+        </router-link>
+        <router-link to="/admin/disciplines" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">📚</span> Дисципліни
+        </router-link>
+        <router-link to="/teacher" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">📝</span> Виставлення оцінок
+        </router-link>
+      </template>
+
+      <template v-else-if="isStudent">
+        <router-link to="/admin" class="nav-item" active-class="nav-item-active" exact>
+          <span class="nav-icon">🏠</span> Про кафедру
+        </router-link>
+        <router-link to="/admin/teachers" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">👨‍🏫</span> Викладачі
+        </router-link>
+        <router-link to="/admin/disciplines" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">📚</span> Дисципліни
+        </router-link>
+        <router-link to="/student" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">📊</span> Мої оцінки
+        </router-link>
+      </template>
+
+      <template v-else>
+        <router-link to="/admin" class="nav-item" active-class="nav-item-active" exact>
+          <span class="nav-icon">🏠</span> Про кафедру
+        </router-link>
+        <router-link to="/admin/teachers" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">👨‍🏫</span> Викладачі
+        </router-link>
+        <router-link to="/admin/disciplines" class="nav-item" active-class="nav-item-active">
+          <span class="nav-icon">📚</span> Дисципліни
+        </router-link>
+      </template>
     </nav>
 
     <div class="sidebar-footer">
-      <div class="user-profile">
-        <div class="user-avatar">А</div>
-        <div class="user-info">
-          <span class="user-name">Адміністратор Іван</span>
-          <span class="user-role">Адміністратор</span>
+      <template v-if="authStore.token">
+        <div class="user-profile">
+          <div class="user-avatar">{{ avatarLetter }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ authStore.username }}</span>
+            <div class="user-meta">
+              <span class="user-role">{{ roleLabel }}</span>
+              <span class="user-id-badge">ID: {{ authStore.userId }}</span>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <button class="btn-logout" @click="handleLogout">
-        <span class="logout-icon"></span> Вийти
-      </button>
+        <button class="btn-logout" @click="handleLogout">
+          <span class="logout-icon"></span> Вийти
+        </button>
+      </template>
+      <template v-else>
+        <router-link to="/login" class="btn-login-side">Увійти</router-link>
+      </template>
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/authStore'
 
-const router = useRouter();
+const router = useRouter()
+const authStore = useAuthStore()
+
+const isAdminOrManager = computed(() => authStore.isRole('ADMIN', 'MANAGER'))
+const isTeacher = computed(() => authStore.isRole('TEACHER'))
+const isStudent = computed(() => authStore.isRole('STUDENT'))
+
+const avatarLetter = computed(() => (authStore.username?.[0] ?? 'U').toUpperCase())
+
+const roleLabel = computed(() => {
+  switch (authStore.role) {
+    case 'ADMIN': return 'Адміністратор'
+    case 'MANAGER': return 'Менеджер'
+    case 'TEACHER': return 'Викладач'
+    case 'STUDENT': return 'Студент'
+    default: return authStore.role ?? ''
+  }
+})
 
 const handleLogout = () => {
-  router.push('/login');
-};
+  authStore.clearAuth()
+  router.push('/login')
+}
 </script>
 
 <style src="@/css/components/SideBar.css"></style>

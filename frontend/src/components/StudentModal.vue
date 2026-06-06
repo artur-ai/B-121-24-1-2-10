@@ -7,9 +7,16 @@
       </div>
 
       <div class="modal-body">
+        <div v-if="validationError" class="form-error">{{ validationError }}</div>
+
         <div class="form-group">
-          <label>ПІБ студента</label>
-          <input type="text" v-model="form.name" placeholder="Прізвище Ім'я По батькові" />
+          <label>Прізвище</label>
+          <input type="text" v-model="form.lastName" placeholder="Прізвище" />
+        </div>
+
+        <div class="form-group">
+          <label>Ім'я</label>
+          <input type="text" v-model="form.firstName" placeholder="Ім'я" />
         </div>
 
         <div class="form-group">
@@ -17,20 +24,17 @@
           <input type="email" v-model="form.email" placeholder="email@student.ua" />
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Група</label>
-            <select v-model="form.group">
-              <option value="КН-21">КН-21</option>
-              <option value="КН-31">КН-31</option>
-              <option value="ПЗ-11">ПЗ-11</option>
-              <option value="ПЗ-21">ПЗ-21</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Рік вступу</label>
-            <input type="number" v-model.number="form.year" min="2000" max="2030" />
-          </div>
+        <div class="form-group">
+          <label>Група</label>
+          <select v-model="form.groupId">
+            <option :value="null" disabled>Оберіть групу</option>
+            <option v-for="g in groups" :key="g.id" :value="g.id">{{ g.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-group" v-if="!isEditing">
+          <label>ID користувача (необов'язково)</label>
+          <input type="number" v-model.number="form.userId" placeholder="Вкажіть ID для входу в систему" />
         </div>
       </div>
 
@@ -43,52 +47,83 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { reactive, ref, watch } from 'vue'
+import type { GroupResponse } from '../api/groupsApi'
 
 const props = defineProps({
   isOpen: Boolean,
   studentToEdit: {
     type: Object as () => any | null,
     default: null
+  },
+  groups: {
+    type: Array as () => GroupResponse[],
+    default: () => []
   }
-});
+})
 
-const emit = defineEmits(['close', 'save']);
+const emit = defineEmits(['close', 'save'])
 
-const form = ref({
+const form = reactive({
   id: null as number | null,
-  name: '',
+  firstName: '',
+  lastName: '',
   email: '',
-  group: 'КН-21',
-  year: new Date().getFullYear()
-});
+  groupId: null as number | null,
+  userId: null as number | null
+})
 
-const isEditing = ref(false);
+const validationError = ref('')
+const isEditing = ref(false)
 
 watch(() => props.isOpen, (newVal) => {
   if (newVal) {
+    validationError.value = ''
     if (props.studentToEdit) {
-      isEditing.value = true;
-      form.value = { ...props.studentToEdit };
+      isEditing.value = true
+      form.id = props.studentToEdit.id
+      form.firstName = props.studentToEdit.firstName || ''
+      form.lastName = props.studentToEdit.lastName || ''
+      form.email = props.studentToEdit.email || ''
+      form.groupId = props.studentToEdit.groupId ?? null
+      form.userId = null
     } else {
-      isEditing.value = false;
-      form.value = {
-        id: null,
-        name: '',
-        email: '',
-        group: 'КН-21',
-        year: new Date().getFullYear()
-      };
+      isEditing.value = false
+      form.id = null
+      form.firstName = ''
+      form.lastName = ''
+      form.email = ''
+      form.groupId = null
+      form.userId = null
     }
   }
-});
+})
 
-const closeModal = () => emit('close');
+const closeModal = () => emit('close')
 
 const saveStudent = () => {
-  if (!form.value.name || !form.value.email) return alert('Заповніть обов\'язкові поля');
-  emit('save', { ...form.value });
-};
+  if (!form.lastName.trim()) {
+    validationError.value = 'Введіть прізвище студента'
+    return
+  }
+  if (!form.firstName.trim()) {
+    validationError.value = "Введіть ім'я студента"
+    return
+  }
+  if (!form.email.trim()) {
+    validationError.value = 'Введіть email'
+    return
+  }
+  validationError.value = ''
+  emit('save', {
+    id: form.id,
+    firstName: form.firstName,
+    lastName: form.lastName,
+    email: form.email,
+    groupId: form.groupId,
+    userId: form.userId
+  })
+}
 </script>
 
 <style src="../css/components/StudentModal.css"></style>

@@ -221,3 +221,109 @@
   border-color: var(--color-student-text);
   background-color: #e4f5bd;
 }
+
+.auth-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--btn-secondary-border);
+  margin-bottom: 20px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.auth-tab.active {
+  color: var(--btn-primary-bg);
+  border-bottom-color: var(--btn-primary-bg);
+}
+
+.login-select {
+  padding: 12px 14px;
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-family: var(--font-main);
+  outline: none;
+  background-color: white;
+  cursor: pointer;
+}
+
+.login-success {
+  background-color: #f0fff4;
+  color: #2f9e44;
+  border: 1px solid #b2f2bb;
+  border-radius: var(--radius-btn);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.login-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.login-field input {
+  padding: 12px 14px;
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-family: var(--font-main);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.login-field input:focus {
+  border-color: var(--bg-page-end);
+}
+
+.guest-btn {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  padding: 14px;
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-weight: 600;
+  background-color: var(--bg-card);
+  border: 1px solid var(--btn-secondary-border);
+  color: var(--text-main);
+}
+
+.guest-btn:hover {
+  background-color: var(--btn-secondary-hover);
+}
+
+.login-error {
+  background-color: #fff5f5;
+  color: #e03131;
+  border: 1px solid #ffc9c9;
+  border-radius: var(--radius-btn);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}

@@ -120,3 +120,12 @@
 }
 
 .btn-primary:hover { background-color: var(--btn-primary-hover); }
+
+.form-error {
+  background-color: #fff5f5;
+  color: #e03131;
+  border: 1px solid #ffc9c9;
+  border-radius: var(--radius-btn);
+  padding: 10px 14px;
+  font-size: 13px;
+}

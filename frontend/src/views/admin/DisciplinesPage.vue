@@ -7,41 +7,42 @@
       </div>
 
       <div class="filters">
-        <select class="filter-select" v-model="selectedTeacher">
+        <select class="filter-select" v-model="selectedTeacherId">
           <option value="">Усі викладачі</option>
-          <option value="Шевченко М.П.">Шевченко М.П.</option>
-          <option value="Коваленко А.І.">Коваленко А.І.</option>
-          <option value="Петренко Л.В.">Петренко Л.В.</option>
+          <option v-for="t in availableTeachers" :key="t.id" :value="t.id">
+            {{ t.lastName }} {{ t.firstName }}
+          </option>
         </select>
 
         <select class="filter-select" v-model="sortBy">
           <option value="name">Назва</option>
-          <option value="credits">Кредити</option>
         </select>
 
-        <button class="btn btn-primary add-btn" @click="handleAdd">+ Додати</button>
+        <button v-if="canEdit" class="btn btn-primary add-btn" @click="handleAdd">+ Додати</button>
       </div>
     </div>
 
     <div class="results-count">Знайдено: {{ filteredDisciplines.length }}</div>
 
-    <div class="disciplines-list">
+    <div v-if="loading" class="state-message">Завантаження...</div>
+    <div v-else-if="error" class="state-message error">{{ error }}</div>
+    <div v-else class="disciplines-list">
       <div class="discipline-card" v-for="disc in filteredDisciplines" :key="disc.id">
+
+        <div class="discipline-avatar">{{ disc.name?.[0]?.toUpperCase() }}</div>
 
         <div class="discipline-content">
           <div class="discipline-name">{{ disc.name }}</div>
-          <div class="discipline-meta">
-            Викладач: {{ disc.teacher }} · {{ disc.credits }} кредити · {{ disc.semester }} семестр
+          <div class="discipline-meta" v-if="disc.teacherName">
+            Викладач: {{ disc.teacherName }}
           </div>
-
-          <div class="discipline-groups">
-            <span class="group-tag" v-for="group in disc.groups" :key="group">{{ group }}</span>
+          <div class="discipline-meta" v-if="disc.description">
+            {{ disc.description }}
           </div>
         </div>
 
         <div class="discipline-right">
-          <div class="credit-badge">{{ disc.credits }} кр.</div>
-          <div class="discipline-actions">
+          <div v-if="canEdit" class="discipline-actions">
             <button class="action-btn" @click="handleEdit(disc)">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z"/></svg>
             </button>
@@ -60,6 +61,7 @@
     <DisciplineModal
       :is-open="isModalOpen"
       :discipline-to-edit="editingDiscipline"
+      :teachers="availableTeachers"
       @close="isModalOpen = false"
       @save="saveDiscipline"
     />
@@ -77,69 +79,144 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import DisciplineModal from '../../components/DisciplineModal.vue';
+import { ref, computed, onMounted } from 'vue'
+import DisciplineModal from '../../components/DisciplineModal.vue'
+import { disciplinesApi, type DisciplineResponse } from '../../api/disciplinesApi'
+import { teachersApi, type TeacherResponse } from '../../api/teachersApi'
+import { useAuthStore } from '../../stores/authStore'
 
-const searchQuery = ref('');
-const selectedTeacher = ref('');
-const sortBy = ref('name');
+const authStore = useAuthStore()
+const canEdit = computed(() => authStore.isRole('ADMIN', 'MANAGER'))
 
-const isModalOpen = ref(false);
-const editingDiscipline = ref<any>(null);
-const deletingId = ref<number | null>(null);
+const searchQuery = ref('')
+const selectedTeacherId = ref<number | ''>('')
+const sortBy = ref('name')
 
-const disciplines = ref([
-  { id: 1, name: 'Алгоритми та структури даних', teacher: 'Шевченко М.П.', credits: 5, semester: 3, groups: ['КН-21', 'КН-31'] },
-  { id: 2, name: 'Вища математика', teacher: 'Коваленко А.І.', credits: 6, semester: 1, groups: ['КН-21', 'ПЗ-11', 'ПЗ-21'] },
-  { id: 3, name: 'Об\'єктно-орієнтоване програмування', teacher: 'Петренко Л.В.', credits: 5, semester: 2, groups: ['КН-21', 'ПЗ-11'] },
-  { id: 4, name: 'Системне програмування', teacher: 'Шевченко М.П.', credits: 4, semester: 4, groups: ['КН-31'] },
-]);
+const isModalOpen = ref(false)
+const editingDiscipline = ref<any>(null)
+const deletingId = ref<number | null>(null)
+const loading = ref(false)
+const error = ref('')
+
+const availableTeachers = ref<TeacherResponse[]>([])
+
+interface DisciplineUI {
+  id: number
+  name: string
+  description: string
+  teacherName: string
+  teacherIds: number[]
+}
+
+const disciplines = ref<DisciplineUI[]>([])
+
+function buildTeacherName(ids: number[], teachers: TeacherResponse[]): string {
+  return ids
+    .map(id => teachers.find(t => t.id === id))
+    .filter(Boolean)
+    .map(t => `${t!.lastName} ${t!.firstName}`.trim())
+    .join(', ')
+}
+
+function mapDiscipline(d: DisciplineResponse, teachers: TeacherResponse[]): DisciplineUI {
+  return {
+    id: d.id,
+    name: d.name,
+    description: d.description || '',
+    teacherName: buildTeacherName(d.teacherIds ?? [], teachers),
+    teacherIds: d.teacherIds ?? []
+  }
+}
+
+async function fetchAll() {
+  loading.value = true
+  error.value = ''
+  try {
+    const [disciplinesData, teachersData] = await Promise.all([
+      disciplinesApi.getAll(),
+      teachersApi.getAll()
+    ])
+    disciplines.value = disciplinesData.map(d => mapDiscipline(d, teachersData))
+    availableTeachers.value = teachersData
+  } catch {
+    error.value = 'Не вдалося завантажити дані. Перевірте підключення до сервера.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(fetchAll)
 
 const filteredDisciplines = computed(() => {
-  let result = disciplines.value;
+  let result = disciplines.value
   if (searchQuery.value) {
-    const q = searchQuery.value.toLowerCase();
-    result = result.filter(d => d.name.toLowerCase().includes(q));
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(d => d.name.toLowerCase().includes(q))
   }
-  if (selectedTeacher.value) {
-    result = result.filter(d => d.teacher === selectedTeacher.value);
+  if (selectedTeacherId.value !== '') {
+    result = result.filter(d => d.teacherIds.includes(Number(selectedTeacherId.value)))
   }
-  result = [...result].sort((a, b) => {
-    if (sortBy.value === 'credits') return b.credits - a.credits;
-    return a.name.localeCompare(b.name);
-  });
-  return result;
-});
+  return [...result].sort((a, b) => a.name.localeCompare(b.name))
+})
 
 const handleAdd = () => {
-  editingDiscipline.value = null;
-  isModalOpen.value = true;
-};
+  editingDiscipline.value = null
+  isModalOpen.value = true
+}
 
-const handleEdit = (disc: any) => {
-  editingDiscipline.value = disc;
-  isModalOpen.value = true;
-};
+const handleEdit = (disc: DisciplineUI) => {
+  editingDiscipline.value = disc
+  isModalOpen.value = true
+}
 
 const handleDelete = (id: number) => {
-  deletingId.value = id;
-};
+  deletingId.value = id
+}
 
-const confirmDelete = () => {
-  disciplines.value = disciplines.value.filter(d => d.id !== deletingId.value);
-  deletingId.value = null;
-};
-
-const saveDiscipline = (data: any) => {
-  if (data.id) {
-    const index = disciplines.value.findIndex(d => d.id === data.id);
-    if (index !== -1) disciplines.value[index] = data;
-  } else {
-    const newId = disciplines.value.length > 0 ? Math.max(...disciplines.value.map(d => d.id)) + 1 : 1;
-    disciplines.value.push({ ...data, id: newId });
+const confirmDelete = async () => {
+  if (deletingId.value === null) return
+  try {
+    await disciplinesApi.delete(deletingId.value)
+    await fetchAll()
+  } catch {
+    error.value = 'Не вдалося видалити дисципліну.'
+  } finally {
+    deletingId.value = null
   }
-  isModalOpen.value = false;
-};
+}
+
+const saveDiscipline = async (formData: any) => {
+  const request = {
+    name: formData.name || '',
+    description: formData.description || ''
+  }
+  try {
+    let disciplineId: number
+    const oldTeacherIds: number[] = editingDiscipline.value?.teacherIds ?? []
+    const newTeacherIds: number[] = formData.teacherIds ?? []
+
+    if (formData.id) {
+      await disciplinesApi.update(formData.id, request)
+      disciplineId = formData.id
+    } else {
+      const created = await disciplinesApi.create(request)
+      disciplineId = created.id
+    }
+
+    const toAdd = newTeacherIds.filter(id => !oldTeacherIds.includes(id))
+    const toRemove = oldTeacherIds.filter(id => !newTeacherIds.includes(id))
+
+    await Promise.all([
+      ...toAdd.map(tid => teachersApi.assignDiscipline(tid, disciplineId)),
+      ...toRemove.map(tid => teachersApi.removeDiscipline(tid, disciplineId))
+    ])
+
+    isModalOpen.value = false
+    await fetchAll()
+  } catch {
+    error.value = 'Не вдалося зберегти дисципліну.'
+  }
+}
 </script>
 
 <style src="../../css/views/admin/DisciplinesPage.css"></style>
