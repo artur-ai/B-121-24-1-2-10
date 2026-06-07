@@ -86,17 +86,10 @@ public class GradeServiceImpl implements GradeService {
     public GradeDto updateGrade(Long id, GradeDto dto, Long currentUserId) {
         Grade grade = uow.grades().findById(id);
 
-        Teacher teacher = uow.teachers().findByUserId(currentUserId)
+        uow.teachers().findByUserId(currentUserId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Teacher not found for user: " + currentUserId
                 ));
-
-        if (!grade.getTeacher().getId().equals(teacher.getId())) {
-            throw new com.electronic.kafedra.common.exception
-                    .AccessDeniedException(
-                    "You can only update your own grades"
-            );
-        }
 
         grade.setValue(dto.getValue());
         grade.setComment(dto.getComment());
