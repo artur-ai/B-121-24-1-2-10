@@ -2,10 +2,13 @@ package com.electronic.kafedra.pl.controller;
 
 import com.electronic.kafedra.bll.dto.StudentDto;
 import com.electronic.kafedra.bll.service.StudentService;
+import com.electronic.kafedra.common.exception.EntityNotFoundException;
+import com.electronic.kafedra.dal.entity.Student;
 import com.electronic.kafedra.pl.mapper.UiMapper;
 import com.electronic.kafedra.pl.model.request.CreateStudentRequest;
 import com.electronic.kafedra.pl.model.request.UpdateStudentRequest;
 import com.electronic.kafedra.pl.model.response.StudentResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

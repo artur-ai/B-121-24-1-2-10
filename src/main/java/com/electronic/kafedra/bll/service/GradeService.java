@@ -13,6 +13,8 @@ public interface GradeService {
 
     List<GradeDto> getByStudentAndDiscipline(Long studentId, Long disciplineId);
 
+    List<GradeDto> getMyGrades(Long userId);
+
     GradeDto addGrade(GradeDto dto, Long currentUserId);
 
     GradeDto updateGrade(Long id, GradeDto dto, Long currentUserId);

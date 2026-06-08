@@ -61,6 +61,16 @@ public class GradeController {
         );
     }
 
+    @GetMapping("/my")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<List<GradeResponse>> getMyGrades(
+            HttpServletRequest request) {
+        Long userId = currentUserService.getCurrentUserId(request);
+        return ResponseEntity.ok(
+                uiMapper.toGradeResponseList(gradeService.getMyGrades(userId))
+        );
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'TEACHER')")
     public ResponseEntity<GradeResponse> addGrade(

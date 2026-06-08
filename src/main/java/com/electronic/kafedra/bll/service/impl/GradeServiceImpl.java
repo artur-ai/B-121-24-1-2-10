@@ -83,6 +83,16 @@ public class GradeServiceImpl implements GradeService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<GradeDto> getMyGrades(Long userId) {
+        Student student = uow.students().findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Student not found for user: " + userId
+                ));
+        return mapper.toDtoList(uow.grades().findByStudentId(student.getId()));
+    }
+
+    @Override
     public GradeDto updateGrade(Long id, GradeDto dto, Long currentUserId) {
         Grade grade = uow.grades().findById(id);
 

@@ -32,6 +32,8 @@ export const gradesApi = {
     api.get<GradeResponse[]>(`/grades/teacher/${teacherId}`),
   getByDiscipline: (disciplineId: number) =>
     api.get<GradeResponse[]>(`/grades/discipline/${disciplineId}`),
+  getMyGrades: () =>
+    api.get<GradeResponse[]>('/grades/my'),
   create: (data: CreateGradeRequest) =>
     api.post<GradeResponse>('/grades', data),
   update: (id: number, data: UpdateGradeRequest) =>
