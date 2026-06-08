@@ -12,5 +12,6 @@ public interface UserMapper {
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "teacher", ignore = true)
     @Mapping(target = "student", ignore = true)
+
     User toEntity(UserDto dto);
 }

@@ -65,6 +65,14 @@ public class TeacherServiceImpl implements TeacherService {
         existing.setLastName(dto.getLastName());
         existing.setEmail(dto.getEmail());
         existing.setPosition(dto.getPosition());
+
+        if (dto.getUserId() != null) {
+            User user = uow.users().findById(dto.getUserId());
+            existing.setUser(user);
+        } else {
+            existing.setUser(null);
+        }
+
         return mapper.toDto(uow.teachers().save(existing));
     }
 
