@@ -22,7 +22,6 @@ public interface UiMapper {
     TeacherDto toDto(CreateTeacherRequest request);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "userId", ignore = true)
     @Mapping(target = "disciplineIds", ignore = true)
     TeacherDto toDto(UpdateTeacherRequest request);
 

@@ -65,6 +65,14 @@ public class TeacherServiceImpl implements TeacherService {
         existing.setLastName(dto.getLastName());
         existing.setEmail(dto.getEmail());
         existing.setPosition(dto.getPosition());
+
+        if (dto.getUserId() != null) {
+            User user = uow.users().findById(dto.getUserId());
+            existing.setUser(user);
+        } else {
+            existing.setUser(null);
+        }
+
         return mapper.toDto(uow.teachers().save(existing));
     }
 
@@ -79,18 +87,20 @@ public class TeacherServiceImpl implements TeacherService {
         Teacher teacher = uow.teachers().findById(teacherId);
         Discipline discipline = uow.disciplines().findById(disciplineId);
 
-        if (!teacher.getDisciplines().contains(discipline)) {
-            teacher.getDisciplines().add(discipline);
+        if (!discipline.getTeachers().contains(teacher)) {
+            discipline.getTeachers().add(teacher);
         }
 
-        return mapper.toDto(uow.teachers().save(teacher));
+        uow.disciplines().save(discipline);
+        return mapper.toDto(uow.teachers().findById(teacherId));
     }
 
     @Override
     public TeacherDto removeDiscipline(Long teacherId, Long disciplineId) {
         Teacher teacher = uow.teachers().findById(teacherId);
         Discipline discipline = uow.disciplines().findById(disciplineId);
-        teacher.getDisciplines().remove(discipline);
-        return mapper.toDto(uow.teachers().save(teacher));
+        discipline.getTeachers().remove(teacher);
+        uow.disciplines().save(discipline);
+        return mapper.toDto(uow.teachers().findById(teacherId));
     }
 }

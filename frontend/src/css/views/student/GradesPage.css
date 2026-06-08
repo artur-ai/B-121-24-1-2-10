@@ -1,0 +1,154 @@
+.grades-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.link-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  padding: 40px;
+  text-align: center;
+  border: 1px solid var(--btn-secondary-border);
+}
+
+.link-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: var(--text-dark);
+}
+
+.link-card p {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 0 0 24px 0;
+}
+
+.link-form {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
+
+.link-form input {
+  padding: 10px 14px;
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  width: 160px;
+  outline: none;
+}
+
+.grades-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.grades-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.btn-reset {
+  background: none;
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-btn);
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.grades-table-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--btn-secondary-border);
+  overflow: hidden;
+}
+
+.table-header, .table-row {
+  display: grid;
+  grid-template-columns: 2fr 75px 140px 100px 2fr;
+  padding: 12px 20px;
+  align-items: center;
+  gap: 12px;
+}
+
+.table-header {
+  background: var(--bg-light-gray);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-row {
+  font-size: 14px;
+  border-top: 1px solid var(--btn-secondary-border);
+}
+
+.grade-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.grade-excellent { background: #ebfbee; color: #2f9e44; }
+.grade-good { background: #e7f5ff; color: #1971c2; }
+.grade-satisf { background: #fff9db; color: #e67700; }
+.grade-fail { background: #fff5f5; color: #e03131; }
+
+.letter-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.letter-a { background: #ebfbee; color: #2f9e44; }
+.letter-bc { background: #e7f5ff; color: #1971c2; }
+.letter-de { background: #fff9db; color: #e67700; }
+.letter-f { background: #fff5f5; color: #e03131; }
+
+.grades-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.summary-item {
+  background: var(--bg-card);
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  text-align: center;
+}
+
+.summary-num {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--btn-primary-bg);
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.state-message { padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+.state-message.error { color: #e03131; }
+.empty-state { padding: 40px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+.btn { padding: 10px 20px; border-radius: var(--radius-btn); font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+.btn-primary { background: var(--btn-primary-bg); color: white; }
+.btn-primary:disabled { background: var(--btn-disabled-bg); color: var(--btn-disabled-text); cursor: not-allowed; }

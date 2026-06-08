@@ -25,4 +25,5 @@ public class UpdateTeacherRequest {
     private String email;
 
     private String position;
+    private Long userId;
 }

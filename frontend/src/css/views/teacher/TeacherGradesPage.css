@@ -1,0 +1,248 @@
+.tg-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.tg-page-header { display: flex; align-items: center; gap: 16px; }
+.tg-title { margin: 0; font-size: 22px; font-weight: 700; color: var(--text-dark); }
+
+.tg-no-profile {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  padding: 40px;
+  text-align: center;
+  border: 1px solid var(--btn-secondary-border);
+  color: var(--text-muted);
+}
+
+.tg-controls {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.tg-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tg-search-group { flex: 1; min-width: 200px; }
+
+.tg-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tg-select {
+  padding: 10px 36px 10px 14px;
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-btn);
+  background: var(--bg-card);
+  font-size: 14px;
+  font-family: var(--font-main);
+  color: var(--text-dark);
+  cursor: pointer;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2364748b"><path d="M7 10L12 15L17 10H7Z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 20px;
+  outline: none;
+  min-width: 200px;
+}
+
+.tg-select:disabled { opacity: 0.5; cursor: default; }
+
+.tg-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tg-search-icon {
+  position: absolute;
+  left: 12px;
+  width: 18px;
+  height: 18px;
+  fill: var(--text-muted);
+  pointer-events: none;
+}
+
+.tg-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  border: 1px solid var(--btn-secondary-border);
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-family: var(--font-main);
+  color: var(--text-dark);
+  outline: none;
+}
+
+.tg-search-input:disabled { opacity: 0.5; }
+.tg-search-input:focus { border-color: var(--btn-primary-bg); }
+
+.tg-hint {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  border: 1px dashed var(--btn-secondary-border);
+}
+
+.tg-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.tg-error { color: #e03131; }
+
+.tg-table-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--btn-secondary-border);
+  overflow: hidden;
+}
+
+.tg-table-head,
+.tg-table-row {
+  display: grid;
+  grid-template-columns: 2fr 90px 75px 150px minmax(0, 2fr) auto;
+  padding: 12px 20px;
+  align-items: center;
+  gap: 12px;
+}
+
+.tg-table-head {
+  background: var(--bg-light-gray);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tg-table-row {
+  font-size: 14px;
+  border-top: 1px solid var(--btn-secondary-border);
+  transition: background 0.15s;
+}
+
+.tg-table-row:hover { background: var(--bg-light-gray); }
+.tg-row-editing { background: #f0f7ff !important; }
+
+.tg-student-name { font-weight: 500; color: var(--text-dark); }
+
+.tg-group-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--avatar-bg-blue);
+  color: var(--avatar-text-blue);
+  white-space: nowrap;
+}
+
+.tg-no-grade { color: var(--text-muted); }
+
+.tg-grade-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.grade-excellent { background: #ebfbee; color: #2f9e44; }
+.grade-good { background: #e7f5ff; color: #1971c2; }
+.grade-satisf { background: #fff9db; color: #e67700; }
+.grade-fail { background: #fff5f5; color: #e03131; }
+
+.tg-letter-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.letter-a { background: #ebfbee; color: #2f9e44; }
+.letter-bc { background: #e7f5ff; color: #1971c2; }
+.letter-de { background: #fff9db; color: #e67700; }
+.letter-f { background: #fff5f5; color: #e03131; }
+
+.tg-letter-preview {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 6px;
+}
+
+.tg-note-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  display: block;
+}
+
+.tg-edit-input {
+  padding: 6px 10px;
+  border: 1px solid var(--btn-primary-bg);
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-family: var(--font-main);
+  outline: none;
+  background: white;
+}
+
+.tg-grade-input { width: 72px; }
+.tg-note-input { width: 100%; min-width: 0; box-sizing: border-box; display: block; }
+
+.tg-col-note { min-width: 0; overflow: hidden; }
+.tg-col-actions { white-space: nowrap; }
+
+.tg-col-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.tg-edit-actions { gap: 6px; }
+
+.btn { padding: 8px 16px; border-radius: var(--radius-btn); font-size: 13px; font-weight: 600; cursor: pointer; border: none; font-family: var(--font-main); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-primary { background: var(--btn-primary-bg); color: white; }
+.btn-primary:disabled { opacity: 0.6; cursor: default; }
+.btn-secondary { background: var(--bg-card); border: 1px solid var(--btn-secondary-border); color: var(--text-main); }
+
+.tg-error-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #e03131;
+  color: white;
+  padding: 12px 20px;
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  z-index: 999;
+}
+
+.link-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-card);
+  padding: 40px;
+  text-align: center;
+  border: 1px solid var(--btn-secondary-border);
+}
